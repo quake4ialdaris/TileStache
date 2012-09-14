@@ -10,7 +10,15 @@ Keyword arguments:
     Database connection string suitable for use in psycopg2.connect().
     See http://initd.org/psycopg/docs/module.html#psycopg2.connect for more.
   
-  
+Example Configuration:
+  "map": 
+    {
+        "provider": 
+        { 
+               "class": "TileStache.OSciMap:Provider",
+                "kwargs": { "dsn": "dbname=gis user=osm password=osm" }
+        }
+    }
 """
 import types
 import TileData_pb2
