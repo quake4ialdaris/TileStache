@@ -2,7 +2,10 @@
 
 Note:
  
-....
+A Standard osm2pgsql import can be used as source. The Database requires the functions
+'__get_tile(x,y,z)' and '__get_tile_poi(x,y,z)' which return columns of 'tags' as hstore
+and geometries as ewkb ('geom'). Geometries need to be clipped to tile boundary 
+(plus a few pixel offset).
 
 Keyword arguments:
 
@@ -16,7 +19,12 @@ Example Configuration:
         "provider": 
         { 
                "class": "TileStache.OSciMap:Provider",
-                "kwargs": { "dsn": "dbname=gis user=osm password=osm" }
+                "kwargs": 
+                { 
+                            "dsn": "dbname=gis user=osm password=osm" 
+                            "query_tile": "SELECT tags, geom FROM __get_tile(%s,%s,%s,false)",
+                            "query_poi": "SELECT tags, geom FROM __get_tile_poi(%s,%s,%s)"
+                }
         }
     }
 """
@@ -71,12 +79,12 @@ class SaveableResponse:
 class Provider:
     """
     """
-    def __init__(self, layer, dsn):
+    def __init__(self, layer, dsn, query_tile, query_poi):
         self.layer = layer
         self.dbdsn = dsn
         self.tileSize = 256
-        self.query_tile = "SELECT tags, geom FROM __get_tile(%s,%s,%s)"
-        self.query_tile_poi = "SELECT tags, geom FROM __get_tile_poi(%s,%s,%s)"
+        self.query_tile = query_tile #"SELECT tags, geom FROM __get_tile(%s,%s,%s)"
+        self.query_tile_poi = query_poi #"SELECT tags, geom FROM __get_tile_poi(%s,%s,%s)"
         self.query_exists = "SELECT true FROM tiles WHERE x=%s AND y=%s AND z=%s"
         #self.pool = ThreadedConnectionPool(10,50,dsn)
         #register_hstore(None, True, False, 267)
@@ -291,7 +299,7 @@ class Provider:
         db = conn.cursor()
         register_hstore(conn, True, False)
 
-        db.execute(self.query_tile, (coord.column * self.tileSize, coord.row * self.tileSize, coord.zoom))
+        db.execute(self.query_tile, (coord.column, coord.row, coord.zoom))
         rows = db.fetchall()
         
         tile = TileData_pb2.Data()
@@ -305,7 +313,7 @@ class Provider:
             
             self.addItem(tile, row, coord, geomparser, tagdict)
     
-        db.execute(self.query_tile_poi, (coord.column * self.tileSize, coord.row * self.tileSize, coord.zoom))
+        db.execute(self.query_tile_poi, (coord.column, coord.row, coord.zoom))
         rows = db.fetchall()
         
         for row in rows:
