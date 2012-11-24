@@ -299,7 +299,7 @@ class WKBParser:
             reader.unpack_double()
 
         xx = int(round(x / self.divider - self.dx))
-        yy = int(round(y / self.divider - self.dy))
+        yy = int(round(self.dy - y / self.divider))
         
         #if xx != 0 or yy != 0:
         if self.first or xx - self.lastX != 0 or yy - self.lastY != 0:

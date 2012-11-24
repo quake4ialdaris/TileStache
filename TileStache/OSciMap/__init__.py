@@ -118,8 +118,8 @@ class Provider:
                 
         elif key == 'natural':
             value = tag[1].lower();
-            if zoomlevel <= 9 and not value in ('water', 'wood'):
-                return None
+            #if zoomlevel <= 9 and not value in ('water', 'wood'):
+            #    return None
             
             if value in ('village_green', 'meadow'):
                 return ('landuse', value)
@@ -288,7 +288,7 @@ class Provider:
         # pixel relative to global center
         dx = (coord.column * tilesize) - center
         # flip y-axis
-        dy = center - (coord.row * tilesize + tilesize) 
+        dy = center - (coord.row * tilesize)
         
         # size of one pixel 
         div = f900913 / center
@@ -315,13 +315,11 @@ class Provider:
     
         db.execute(self.query_tile_poi, (coord.column, coord.row, coord.zoom))
         rows = db.fetchall()
-        
         for row in rows:
             # empty geometry
             if (row[0] is None) or (row[1] is None):
                 continue
-            
-            self.addItem(tile, row, coord, geomparser, tagdict)
+        self.addItem(tile, row, coord, geomparser, tagdict)
             
         #db.close()
         tile.num_tags = len(tile.keys)
