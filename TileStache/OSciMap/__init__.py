@@ -319,7 +319,7 @@ class Provider:
             # empty geometry
             if (row[0] is None) or (row[1] is None):
                 continue
-        self.addItem(tile, row, coord, geomparser, tagdict)
+            self.addItem(tile, row, coord, geomparser, tagdict)
             
         #db.close()
         tile.num_tags = len(tile.keys)
